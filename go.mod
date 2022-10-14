@@ -1,4 +1,4 @@
-module github.com/xo/xo
+module github.com/blakearnold/xo
 
 go 1.19
 

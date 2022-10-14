@@ -3,7 +3,7 @@ package loader
 import (
 	"testing"
 
-	xo "github.com/xo/xo/types"
+	xo "github.com/blakearnold/xo/types"
 )
 
 func TestMysqlGoType(t *testing.T) {
@@ -151,13 +151,36 @@ func TestMysqlGoType(t *testing.T) {
 	for i, test := range tests {
 		d, err := xo.ParseType(test.typ, "mysql")
 		if err != nil {
-			t.Fatalf("test %d (%s) %q (nullable: %t) expected no error, got: %v", i, test.name, test.typ, test.nullable, err)
+			t.Fatalf(
+				"test %d (%s) %q (nullable: %t) expected no error, got: %v",
+				i,
+				test.name,
+				test.typ,
+				test.nullable,
+				err,
+			)
 		}
 		if d.Prec != test.prec {
-			t.Errorf("test %d (%s) %q (nullable: %t) expected d.Prec = %d, got: %d", i, test.name, test.typ, test.nullable, test.prec, d.Prec)
+			t.Errorf(
+				"test %d (%s) %q (nullable: %t) expected d.Prec = %d, got: %d",
+				i,
+				test.name,
+				test.typ,
+				test.nullable,
+				test.prec,
+				d.Prec,
+			)
 		}
 		if d.Scale != test.scale {
-			t.Errorf("test %d (%s) %q (nullable: %t) expected d.Scale = %d, got: %d", i, test.name, test.typ, test.nullable, test.scale, d.Scale)
+			t.Errorf(
+				"test %d (%s) %q (nullable: %t) expected d.Scale = %d, got: %d",
+				i,
+				test.name,
+				test.typ,
+				test.nullable,
+				test.scale,
+				d.Scale,
+			)
 		}
 		if d.IsArray {
 			t.Errorf("test %d (%s) %q (nullable: %t) expected d.IsArray = false", i, test.name, test.typ, test.nullable)
@@ -168,10 +191,26 @@ func TestMysqlGoType(t *testing.T) {
 			t.Fatalf("test %d (%s) %q MysqlGoType(%#v) expected no error, got: %v", i, test.name, test.typ, d, err)
 		}
 		if goType != test.goType {
-			t.Errorf("test %d (%s) %q (nullable: %t) expected goType = %q, got: %q", i, test.name, test.typ, test.nullable, test.goType, goType)
+			t.Errorf(
+				"test %d (%s) %q (nullable: %t) expected goType = %q, got: %q",
+				i,
+				test.name,
+				test.typ,
+				test.nullable,
+				test.goType,
+				goType,
+			)
 		}
 		if zero != test.zero {
-			t.Errorf("test %d (%s) %q (nullable: %t) expected zero = %q, got: %q", i, test.name, test.typ, test.nullable, test.zero, zero)
+			t.Errorf(
+				"test %d (%s) %q (nullable: %t) expected zero = %q, got: %q",
+				i,
+				test.name,
+				test.typ,
+				test.nullable,
+				test.zero,
+				zero,
+			)
 		}
 	}
 }

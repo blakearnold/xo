@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/kenshaw/inflector"
-	"github.com/xo/xo/loader"
-	"github.com/xo/xo/models"
-	xo "github.com/xo/xo/types"
+	"github.com/blakearnold/xo/loader"
+	"github.com/blakearnold/xo/models"
+	xo "github.com/blakearnold/xo/types"
 )
 
 // LoadSchema loads a schema from a database.
@@ -58,9 +58,11 @@ func LoadEnums(ctx context.Context, args *Args) ([]xo.Enum, error) {
 	if err != nil {
 		return nil, err
 	}
-	sort.Slice(enumNames, func(i, j int) bool {
-		return enumNames[i].EnumName < enumNames[j].EnumName
-	})
+	sort.Slice(
+		enumNames, func(i, j int) bool {
+			return enumNames[i].EnumName < enumNames[j].EnumName
+		},
+	)
 	// process enums
 	var enums []xo.Enum
 	for _, enum := range enumNames {
@@ -87,10 +89,12 @@ func LoadEnumValues(ctx context.Context, args *Args, enum *xo.Enum) error {
 	}
 	// process enum values
 	for _, val := range enumValues {
-		enum.Values = append(enum.Values, xo.Field{
-			Name:       val.EnumValue,
-			ConstValue: &val.ConstValue,
-		})
+		enum.Values = append(
+			enum.Values, xo.Field{
+				Name:       val.EnumValue,
+				ConstValue: &val.ConstValue,
+			},
+		)
 	}
 	return nil
 }
@@ -128,10 +132,12 @@ func LoadProcs(ctx context.Context, args *Args) ([]xo.Proc, error) {
 			Type: proc.ProcType,
 			ID:   proc.ProcID,
 			Name: proc.ProcName,
-			Returns: append(returnFields, xo.Field{
-				Name: name,
-				Type: d,
-			}),
+			Returns: append(
+				returnFields, xo.Field{
+					Name: name,
+					Type: d,
+				},
+			),
 			Definition: strings.TrimSpace(proc.ProcDef),
 		}
 		// load proc parameters
@@ -147,12 +153,14 @@ func LoadProcs(ctx context.Context, args *Args) ([]xo.Proc, error) {
 		}
 		m = append(m, proc)
 	}
-	sort.Slice(m, func(i, j int) bool {
-		if m[i].Name == m[j].Name {
-			return m[i].ID < m[j].ID
-		}
-		return m[i].Name < m[j].Name
-	})
+	sort.Slice(
+		m, func(i, j int) bool {
+			if m[i].Name == m[j].Name {
+				return m[i].ID < m[j].ID
+			}
+			return m[i].Name < m[j].Name
+		},
+	)
 	return m, nil
 }
 
@@ -174,10 +182,12 @@ func LoadProcParams(ctx context.Context, args *Args, proc *xo.Proc) error {
 		if name == "" {
 			name = fmt.Sprintf("p%d", i)
 		}
-		proc.Params = append(proc.Params, xo.Field{
-			Name: name,
-			Type: d,
-		})
+		proc.Params = append(
+			proc.Params, xo.Field{
+				Name: name,
+				Type: d,
+			},
+		)
 	}
 	return nil
 }
@@ -189,9 +199,11 @@ func LoadTables(ctx context.Context, args *Args, typ string) ([]xo.Table, error)
 	if err != nil {
 		return nil, err
 	}
-	sort.Slice(tables, func(i, j int) bool {
-		return tables[i].TableName < tables[j].TableName
-	})
+	sort.Slice(
+		tables, func(i, j int) bool {
+			return tables[i].TableName < tables[j].TableName
+		},
+	)
 	// create types
 	var m []xo.Table
 	for _, table := range tables {
@@ -279,9 +291,11 @@ func LoadTableIndexes(ctx context.Context, args *Args, table *xo.Table) error {
 	if err != nil {
 		return err
 	}
-	sort.Slice(indexes, func(i, j int) bool {
-		return indexes[i].IndexName < indexes[j].IndexName
-	})
+	sort.Slice(
+		indexes, func(i, j int) bool {
+			return indexes[i].IndexName < indexes[j].IndexName
+		},
+	)
 	// process indexes
 	var priIxLoaded bool
 	for _, index := range indexes {
@@ -374,7 +388,13 @@ func LoadTableForeignKeys(ctx context.Context, args *Args, tables []xo.Table, ta
 	for _, fkey := range foreignKeys {
 		// if the referenced table is excluded, we don't want to omit it
 		if !validType(args, false, fkey.RefTableName) {
-			fmt.Fprintf(os.Stderr, "WARNING: skipping table %q foreign key %q (%q previously excluded)\n", table.Name, fkey.ForeignKeyName, fkey.RefTableName)
+			fmt.Fprintf(
+				os.Stderr,
+				"WARNING: skipping table %q foreign key %q (%q previously excluded)\n",
+				table.Name,
+				fkey.ForeignKeyName,
+				fkey.RefTableName,
+			)
 			continue
 		}
 		// check foreign key
@@ -411,16 +431,20 @@ func LoadTableForeignKeys(ctx context.Context, args *Args, tables []xo.Table, ta
 		// determine foreign key func name
 		fkey.Func = resolveFkName(fkey, table, args.SchemaParams.FkMode.AsString())
 		// foreign key called func name
-		fkey.RefFunc = indexFuncName(xo.Index{
-			IsUnique: true,
-			Fields:   fkey.RefFields,
-		}, fkey.RefTable, false)
+		fkey.RefFunc = indexFuncName(
+			xo.Index{
+				IsUnique: true,
+				Fields:   fkey.RefFields,
+			}, fkey.RefTable, false,
+		)
 		fkeys = append(fkeys, fkey)
 	}
 	// sort fkeys
-	sort.Slice(fkeys, func(i, j int) bool {
-		return fkeys[i].Name < fkeys[j].Name
-	})
+	sort.Slice(
+		fkeys, func(i, j int) bool {
+			return fkeys[i].Name < fkeys[j].Name
+		},
+	)
 	return fkeys, nil
 }
 
@@ -450,7 +474,14 @@ func validType(args *Args, skipIncludes bool, names ...string) bool {
 
 // checkFk checks that the foreign key has a matching field, ref table, and ref
 // field
-func checkFk(tables []xo.Table, table xo.Table, fkey *models.ForeignKey, field *xo.Field, refTable *xo.Table, refField *xo.Field) error {
+func checkFk(
+	tables []xo.Table,
+	table xo.Table,
+	fkey *models.ForeignKey,
+	field *xo.Field,
+	refTable *xo.Table,
+	refField *xo.Field,
+) error {
 	// find field from columns
 	var fieldFound, refTableFound, refFieldFound bool
 	for _, c := range table.Columns {
@@ -479,7 +510,11 @@ func checkFk(tables []xo.Table, table xo.Table, fkey *models.ForeignKey, field *
 	}
 	// check everything was found
 	if !fieldFound || !refTableFound || !refFieldFound {
-		return fmt.Errorf("could not find field, refTable, or refField for table %q foreign key %q", table.Name, fkey.ForeignKeyName)
+		return fmt.Errorf(
+			"could not find field, refTable, or refField for table %q foreign key %q",
+			table.Name,
+			fkey.ForeignKeyName,
+		)
 	}
 	return nil
 }

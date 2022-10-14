@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/kenshaw/snaker"
-	"github.com/xo/xo/models"
-	xo "github.com/xo/xo/types"
+	"github.com/blakearnold/xo/models"
+	xo "github.com/blakearnold/xo/types"
 )
 
 // loaders are registered database loaders.
@@ -40,11 +40,13 @@ func Flags() []xo.FlagSet {
 			continue
 		}
 		for _, flag := range l.Flags() {
-			flags = append(flags, xo.FlagSet{
-				Type: typ,
-				Name: string(flag.ContextKey),
-				Flag: flag,
-			})
+			flags = append(
+				flags, xo.FlagSet{
+					Type: typ,
+					Name: string(flag.ContextKey),
+					Flag: flag,
+				},
+			)
 		}
 	}
 	return flags

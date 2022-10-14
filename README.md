@@ -47,7 +47,7 @@ The following is a matrix of the feature support for each database:
 Install `xo` in the usual Go way:
 
 ```sh
-$ go install github.com/xo/xo@latest
+$ go install github.com/blakearnold/xo@latest
 ```
 
 > **Note:** Go 1.16+ is needed for building `xo` from source.
@@ -547,6 +547,10 @@ if the DB automatically provides the PK.
 
 ### PostgreSQL Auto PK Logic
 * Checks for a sequence that is owned by the table in question.
+* Checks that the primary key is a UUID with a default function.
+
+If either of the above conditions are satisfied then the PK is determined to be
+automatically provided by the DB.
 
 ### MySQL Auto PK Logic
 * Checks for an autoincrement row in the information_schema for the table in

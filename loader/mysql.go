@@ -5,27 +5,29 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/xo/xo/models"
-	xo "github.com/xo/xo/types"
+	"github.com/blakearnold/xo/models"
+	xo "github.com/blakearnold/xo/types"
 )
 
 func init() {
-	Register("mysql", Loader{
-		Mask:             "?",
-		Schema:           models.MysqlSchema,
-		Enums:            models.MysqlEnums,
-		EnumValues:       MysqlEnumValues,
-		Procs:            models.MysqlProcs,
-		ProcParams:       models.MysqlProcParams,
-		Tables:           models.MysqlTables,
-		TableColumns:     models.MysqlTableColumns,
-		TableSequences:   models.MysqlTableSequences,
-		TableForeignKeys: models.MysqlTableForeignKeys,
-		TableIndexes:     models.MysqlTableIndexes,
-		IndexColumns:     models.MysqlIndexColumns,
-		ViewCreate:       models.MysqlViewCreate,
-		ViewDrop:         models.MysqlViewDrop,
-	})
+	Register(
+		"mysql", Loader{
+			Mask:             "?",
+			Schema:           models.MysqlSchema,
+			Enums:            models.MysqlEnums,
+			EnumValues:       MysqlEnumValues,
+			Procs:            models.MysqlProcs,
+			ProcParams:       models.MysqlProcParams,
+			Tables:           models.MysqlTables,
+			TableColumns:     models.MysqlTableColumns,
+			TableSequences:   models.MysqlTableSequences,
+			TableForeignKeys: models.MysqlTableForeignKeys,
+			TableIndexes:     models.MysqlTableIndexes,
+			IndexColumns:     models.MysqlIndexColumns,
+			ViewCreate:       models.MysqlViewCreate,
+			ViewDrop:         models.MysqlViewDrop,
+		},
+	)
 }
 
 // MysqlGoType parse a mysql type into a Go type based on the column
@@ -142,10 +144,12 @@ func MysqlEnumValues(ctx context.Context, db models.DB, schema string, enum stri
 	// process enum vals
 	var values []*models.EnumValue
 	for i, val := range strings.Split(res.EnumValues[1:len(res.EnumValues)-1], "','") {
-		values = append(values, &models.EnumValue{
-			EnumValue:  val,
-			ConstValue: i + 1,
-		})
+		values = append(
+			values, &models.EnumValue{
+				EnumValue:  val,
+				ConstValue: i + 1,
+			},
+		)
 	}
 	return values, nil
 }

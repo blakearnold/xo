@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xo/xo/loader"
-	xo "github.com/xo/xo/types"
+	"github.com/blakearnold/xo/loader"
+	xo "github.com/blakearnold/xo/types"
 )
 
 // LoadQuery loads a query.
@@ -42,28 +42,36 @@ func LoadQuery(ctx context.Context, set *xo.Set, args *Args) error {
 			return err
 		}
 	}
-	set.Queries = append(set.Queries, xo.Query{
-		Driver:       driver,
-		Name:         args.QueryParams.Func,
-		Comment:      args.QueryParams.FuncComment,
-		Exec:         args.QueryParams.Exec,
-		Flat:         args.QueryParams.Flat,
-		One:          args.QueryParams.One,
-		Interpolate:  args.QueryParams.Interpolate,
-		Type:         args.QueryParams.Type,
-		TypeComment:  args.QueryParams.TypeComment,
-		Fields:       typeFields,
-		ManualFields: args.QueryParams.Fields != "",
-		Params:       fields,
-		Query:        query,
-		Comments:     comments,
-	})
+	set.Queries = append(
+		set.Queries, xo.Query{
+			Driver:       driver,
+			Name:         args.QueryParams.Func,
+			Comment:      args.QueryParams.FuncComment,
+			Exec:         args.QueryParams.Exec,
+			Flat:         args.QueryParams.Flat,
+			One:          args.QueryParams.One,
+			Interpolate:  args.QueryParams.Interpolate,
+			Type:         args.QueryParams.Type,
+			TypeComment:  args.QueryParams.TypeComment,
+			Fields:       typeFields,
+			ManualFields: args.QueryParams.Fields != "",
+			Params:       fields,
+			Query:        query,
+			Comments:     comments,
+		},
+	)
 	return nil
 }
 
 // ParseQuery parses a query returning the processed query, a query for
 // introspection, related comments, and extracted params.
-func ParseQuery(ctx context.Context, sqlstr, delimiter string, interpolate, trim, strip bool) ([]string, []string, []string, []xo.Field, error) {
+func ParseQuery(ctx context.Context, sqlstr, delimiter string, interpolate, trim, strip bool) (
+	[]string,
+	[]string,
+	[]string,
+	[]xo.Field,
+	error,
+) {
 	// nth func
 	nth, err := loader.NthParam(ctx)
 	if err != nil {
@@ -124,7 +132,11 @@ func ParseQuery(ctx context.Context, sqlstr, delimiter string, interpolate, trim
 // param value.
 //
 // The modified query is returned, along with any extracted parameters.
-func ParseQueryFields(query, delim string, interpolate, paramInterpolate bool, nth func(int) string) (string, []xo.Field, error) {
+func ParseQueryFields(query, delim string, interpolate, paramInterpolate bool, nth func(int) string) (
+	string,
+	[]xo.Field,
+	error,
+) {
 	// create regexp for delimiter
 	placeholderRE, err := regexp.Compile(delim + `[^` + delim[:1] + `]+` + delim)
 	if err != nil {
@@ -265,10 +277,12 @@ func Introspect(ctx context.Context, query []string, allowNulls, flat bool) ([]x
 		if allowNulls {
 			d.Nullable = !col.NotNull
 		}
-		fields = append(fields, xo.Field{
-			Name: col.ColumnName,
-			Type: d,
-		})
+		fields = append(
+			fields, xo.Field{
+				Name: col.ColumnName,
+				Type: d,
+			},
+		)
 	}
 	return fields, nil
 }
@@ -286,12 +300,14 @@ func SplitFields(s string) ([]xo.Field, error) {
 		if i := strings.Index(field, " "); i != -1 {
 			name, typ = field[:i], field[i+1:]
 		}
-		fields = append(fields, xo.Field{
-			Name: name,
-			Type: xo.Type{
-				Type: typ,
+		fields = append(
+			fields, xo.Field{
+				Name: name,
+				Type: xo.Type{
+					Type: typ,
+				},
 			},
-		})
+		)
 	}
 	return fields, nil
 }

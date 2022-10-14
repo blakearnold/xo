@@ -1,23 +1,25 @@
 package loader
 
 import (
-	"github.com/xo/xo/models"
-	xo "github.com/xo/xo/types"
+	"github.com/blakearnold/xo/models"
+	xo "github.com/blakearnold/xo/types"
 )
 
 func init() {
-	Register("sqlite3", Loader{
-		Mask:             "$%d",
-		Schema:           models.Sqlite3Schema,
-		Tables:           models.Sqlite3Tables,
-		TableColumns:     models.Sqlite3TableColumns,
-		TableSequences:   models.Sqlite3TableSequences,
-		TableForeignKeys: models.Sqlite3TableForeignKeys,
-		TableIndexes:     models.Sqlite3TableIndexes,
-		IndexColumns:     models.Sqlite3IndexColumns,
-		ViewCreate:       models.Sqlite3ViewCreate,
-		ViewDrop:         models.Sqlite3ViewDrop,
-	})
+	Register(
+		"sqlite3", Loader{
+			Mask:             "$%d",
+			Schema:           models.Sqlite3Schema,
+			Tables:           models.Sqlite3Tables,
+			TableColumns:     models.Sqlite3TableColumns,
+			TableSequences:   models.Sqlite3TableSequences,
+			TableForeignKeys: models.Sqlite3TableForeignKeys,
+			TableIndexes:     models.Sqlite3TableIndexes,
+			IndexColumns:     models.Sqlite3IndexColumns,
+			ViewCreate:       models.Sqlite3ViewCreate,
+			ViewDrop:         models.Sqlite3ViewDrop,
+		},
+	)
 }
 
 // Sqlite3GoType parse a sqlite3 type into a Go type based on the column

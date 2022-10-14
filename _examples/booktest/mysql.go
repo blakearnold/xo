@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	models "github.com/xo/xo/_examples/booktest/mysql"
+	models "github.com/blakearnold/xo/_examples/booktest/mysql"
 )
 
 func runMysql(ctx context.Context, db *sql.DB) error {
@@ -105,7 +105,13 @@ func runMysql(ctx context.Context, db *sql.DB) error {
 		return err
 	}
 	for _, book := range books0 {
-		fmt.Printf("Book %d %q: %q available: %q\n", book.BookID, book.BookType, book.Title, book.Available.Format(time.RFC822Z))
+		fmt.Printf(
+			"Book %d %q: %q available: %q\n",
+			book.BookID,
+			book.BookType,
+			book.Title,
+			book.Available.Format(time.RFC822Z),
+		)
 		author, err := book.Author(ctx, db)
 		if err != nil {
 			return err
@@ -119,7 +125,14 @@ func runMysql(ctx context.Context, db *sql.DB) error {
 		return err
 	}
 	for _, ab := range res {
-		fmt.Printf("Book %d: %q, Author: %q, ISBN: %q Tags: %q\n", ab.BookID, ab.BookTitle, ab.AuthorName, ab.BookISBN, ab.BookTags)
+		fmt.Printf(
+			"Book %d: %q, Author: %q, ISBN: %q Tags: %q\n",
+			ab.BookID,
+			ab.BookTitle,
+			ab.AuthorName,
+			ab.BookISBN,
+			ab.BookTags,
+		)
 	}
 	// call say_hello(varchar)
 	str, err := models.SayHello(ctx, db, "john")

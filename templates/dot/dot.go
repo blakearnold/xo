@@ -11,61 +11,65 @@ import (
 	"text/template"
 
 	"github.com/kenshaw/snaker"
-	xo "github.com/xo/xo/types"
+	xo "github.com/blakearnold/xo/types"
 )
 
 // Init registers the template.
 func Init(ctx context.Context, f func(xo.TemplateType)) error {
-	f(xo.TemplateType{
-		Modes: []string{"schema"},
-		Flags: []xo.Flag{
-			{
-				ContextKey: DefaultsKey,
-				Type:       "string",
-				Desc:       "default statements",
-				Default:    "node [shape=none, margin=0]",
+	f(
+		xo.TemplateType{
+			Modes: []string{"schema"},
+			Flags: []xo.Flag{
+				{
+					ContextKey: DefaultsKey,
+					Type:       "string",
+					Desc:       "default statements",
+					Default:    "node [shape=none, margin=0]",
+				},
+				{
+					ContextKey: BoldKey,
+					Type:       "bool",
+					Desc:       "bold header row",
+					Default:    "false",
+				},
+				{
+					ContextKey: ColorKey,
+					Type:       "string",
+					Desc:       "header color",
+					Default:    "lightblue",
+				},
+				{
+					ContextKey: RowKey,
+					Type:       "string",
+					Desc:       "row value template",
+					Default:    "{{ .Name }}: {{ .Type.Type }}",
+				},
+				{
+					ContextKey: DirectionKey,
+					Type:       "bool",
+					Desc:       "enable edge directions",
+					Default:    "true",
+				},
 			},
-			{
-				ContextKey: BoldKey,
-				Type:       "bool",
-				Desc:       "bold header row",
-				Default:    "false",
-			},
-			{
-				ContextKey: ColorKey,
-				Type:       "string",
-				Desc:       "header color",
-				Default:    "lightblue",
-			},
-			{
-				ContextKey: RowKey,
-				Type:       "string",
-				Desc:       "row value template",
-				Default:    "{{ .Name }}: {{ .Type.Type }}",
-			},
-			{
-				ContextKey: DirectionKey,
-				Type:       "bool",
-				Desc:       "enable edge directions",
-				Default:    "true",
+			Funcs: NewFuncs,
+			Process: func(ctx context.Context, _ string, set *xo.Set, emit func(xo.Template)) error {
+				if len(set.Schemas) == 0 {
+					return errors.New("dot template must be passed at least one schema")
+				}
+				for _, schema := range set.Schemas {
+					emit(
+						xo.Template{
+							Partial:  "dot",
+							Dest:     "xo.xo.dot",
+							SortName: schema.Name,
+							Data:     schema,
+						},
+					)
+				}
+				return nil
 			},
 		},
-		Funcs: NewFuncs,
-		Process: func(ctx context.Context, _ string, set *xo.Set, emit func(xo.Template)) error {
-			if len(set.Schemas) == 0 {
-				return errors.New("dot template must be passed at least one schema")
-			}
-			for _, schema := range set.Schemas {
-				emit(xo.Template{
-					Partial:  "dot",
-					Dest:     "xo.xo.dot",
-					SortName: schema.Name,
-					Data:     schema,
-				})
-			}
-			return nil
-		},
-	})
+	)
 	return nil
 }
 

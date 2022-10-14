@@ -18,7 +18,7 @@ import (
 
 	"github.com/kenshaw/snaker"
 	"github.com/xo/dburl/passfile"
-	"github.com/xo/xo/_examples/pgcatalog/pgtypes"
+	"github.com/blakearnold/xo/_examples/pgcatalog/pgtypes"
 	"mvdan.cc/gofumpt/format"
 )
 
@@ -47,9 +47,11 @@ func run(ctx context.Context, dsn, out string) error {
 	if err != nil {
 		return err
 	}
-	sort.Slice(types, func(i, j int) bool {
-		return types[i].Name < types[j].Name
-	})
+	sort.Slice(
+		types, func(i, j int) bool {
+			return types[i].Name < types[j].Name
+		},
+	)
 	buf, err := gen(types)
 	if err != nil {
 		return err
@@ -63,15 +65,21 @@ func gen(types []*pgtypes.PgType) ([]byte, error) {
 	if err := tpl.Execute(buf, types); err != nil {
 		return nil, err
 	}
-	return format.Source(buf.Bytes(), format.Options{
-		ExtraRules: true,
-	})
+	return format.Source(
+		buf.Bytes(), format.Options{
+			ExtraRules: true,
+		},
+	)
 }
 
 // tpl is the type template.
-var tpl = template.Must(template.New("types.go.tpl").Funcs(template.FuncMap{
-	"identifier": snaker.ForceCamelIdentifier,
-}).Parse(string(typesGo)))
+var tpl = template.Must(
+	template.New("types.go.tpl").Funcs(
+		template.FuncMap{
+			"identifier": snaker.ForceCamelIdentifier,
+		},
+	).Parse(string(typesGo)),
+)
 
 //go:embed types.go.tpl
 var typesGo []byte

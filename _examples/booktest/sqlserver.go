@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	models "github.com/xo/xo/_examples/booktest/sqlserver"
+	models "github.com/blakearnold/xo/_examples/booktest/sqlserver"
 )
 
 func runSqlserver(ctx context.Context, db *sql.DB) error {
@@ -114,7 +114,14 @@ func runSqlserver(ctx context.Context, db *sql.DB) error {
 		return err
 	}
 	for _, ab := range res {
-		fmt.Printf("Book %d: %q, Author: %q, ISBN: %q Tags: %q\n", ab.BookID, ab.BookTitle, ab.AuthorName, ab.BookISBN, ab.BookTags)
+		fmt.Printf(
+			"Book %d: %q, Author: %q, ISBN: %q Tags: %q\n",
+			ab.BookID,
+			ab.BookTitle,
+			ab.AuthorName,
+			ab.BookISBN,
+			ab.BookTags,
+		)
 	}
 	// call say_hello(varchar)
 	str, err := models.SayHello(ctx, db, "john")

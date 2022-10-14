@@ -17,10 +17,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/xo/dburl"
 	"github.com/xo/dburl/passfile"
-	"github.com/xo/xo/loader"
-	"github.com/xo/xo/models"
-	"github.com/xo/xo/templates"
-	xo "github.com/xo/xo/types"
+	"github.com/blakearnold/xo/loader"
+	"github.com/blakearnold/xo/models"
+	"github.com/blakearnold/xo/templates"
+	xo "github.com/blakearnold/xo/types"
 	"github.com/yookoala/realpath"
 )
 
@@ -196,7 +196,13 @@ func NewTemplateSet(ctx context.Context, dir, template string) (*templates.Set, 
 }
 
 // RootCommand creates the root command.
-func RootCommand(ctx context.Context, name, version string, ts *templates.Set, args *Args, cmdargs ...string) (*cobra.Command, error) {
+func RootCommand(
+	ctx context.Context,
+	name, version string,
+	ts *templates.Set,
+	args *Args,
+	cmdargs ...string,
+) (*cobra.Command, error) {
 	// command
 	cmd := &cobra.Command{
 		Use:     name,
@@ -274,7 +280,13 @@ func SchemaCommand(ctx context.Context, ts *templates.Set, args *Args) (*cobra.C
 	flags.VarP(args.SchemaParams.FkMode, "fk-mode", "k", args.SchemaParams.FkMode.Desc())
 	flags.VarP(args.SchemaParams.Include, "include", "i", args.SchemaParams.Include.Desc())
 	flags.VarP(args.SchemaParams.Exclude, "exclude", "e", args.SchemaParams.Exclude.Desc())
-	flags.BoolVarP(&args.SchemaParams.UseIndexNames, "use-index-names", "j", false, "use index names as defined in schema for generated code")
+	flags.BoolVarP(
+		&args.SchemaParams.UseIndexNames,
+		"use-index-names",
+		"j",
+		false,
+		"use index names as defined in schema for generated code",
+	)
 	if err := templateFlags(cmd, ts, true, args); err != nil {
 		return nil, err
 	}
@@ -302,19 +314,21 @@ func DumpCommand(ctx context.Context, ts *templates.Set, args *Args) (*cobra.Com
 				return err
 			}
 			// dump
-			return fs.WalkDir(src, ".", func(n string, d fs.DirEntry, err error) error {
-				switch {
-				case err != nil:
-					return err
-				case d.IsDir():
-					return os.MkdirAll(filepath.Join(v[0], n), 0o755)
-				}
-				buf, err := fs.ReadFile(src, n)
-				if err != nil {
-					return err
-				}
-				return ioutil.WriteFile(filepath.Join(v[0], n), buf, 0o644)
-			})
+			return fs.WalkDir(
+				src, ".", func(n string, d fs.DirEntry, err error) error {
+					switch {
+					case err != nil:
+						return err
+					case d.IsDir():
+						return os.MkdirAll(filepath.Join(v[0], n), 0o755)
+					}
+					buf, err := fs.ReadFile(src, n)
+					if err != nil {
+						return err
+					}
+					return ioutil.WriteFile(filepath.Join(v[0], n), buf, 0o644)
+				},
+			)
 		},
 	}
 	if err := templateFlags(cmd, ts, false, args); err != nil {
@@ -335,7 +349,13 @@ func databaseFlags(cmd *cobra.Command, args *Args) {
 // outFlags adds out flags to the command.
 func outFlags(cmd *cobra.Command, args *Args) {
 	cmd.Flags().StringVarP(&args.OutParams.Out, "out", "o", "models", "out path")
-	cmd.Flags().BoolVarP(&args.OutParams.Debug, "debug", "D", false, "debug generated code (writes generated code to disk without post processing)")
+	cmd.Flags().BoolVarP(
+		&args.OutParams.Debug,
+		"debug",
+		"D",
+		false,
+		"debug generated code (writes generated code to disk without post processing)",
+	)
 	cmd.Flags().StringVarP(&args.OutParams.Single, "single", "S", "", "output all contents to the specified file")
 }
 
@@ -397,13 +417,15 @@ func Exec(ctx context.Context, mode string, ts *templates.Set, args *Args) func(
 		ctx := BuildContext(ctx, args)
 		// enable verbose output for sql queries
 		if args.Verbose {
-			models.SetLogger(func(str string, v ...interface{}) {
-				s, z := "SQL: %s\n", []interface{}{str}
-				if len(v) != 0 {
-					s, z = s+"PARAMS: %v\n", append(z, v)
-				}
-				fmt.Printf(s+"\n", z...)
-			})
+			models.SetLogger(
+				func(str string, v ...interface{}) {
+					s, z := "SQL: %s\n", []interface{}{str}
+					if len(v) != 0 {
+						s, z = s+"PARAMS: %v\n", append(z, v)
+					}
+					fmt.Printf(s+"\n", z...)
+				},
+			)
 		}
 		// open database
 		var err error

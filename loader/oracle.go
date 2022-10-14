@@ -3,26 +3,28 @@ package loader
 import (
 	"regexp"
 
-	"github.com/xo/xo/models"
-	xo "github.com/xo/xo/types"
+	"github.com/blakearnold/xo/models"
+	xo "github.com/blakearnold/xo/types"
 )
 
 func init() {
-	Register("oracle", Loader{
-		Mask:             ":%d",
-		Schema:           models.OracleSchema,
-		Procs:            models.OracleProcs,
-		ProcParams:       models.OracleProcParams,
-		Tables:           models.OracleTables,
-		TableColumns:     models.OracleTableColumns,
-		TableSequences:   models.OracleTableSequences,
-		TableForeignKeys: models.OracleTableForeignKeys,
-		TableIndexes:     models.OracleTableIndexes,
-		IndexColumns:     models.OracleIndexColumns,
-		ViewCreate:       models.OracleViewCreate,
-		ViewTruncate:     models.OracleViewTruncate,
-		ViewDrop:         models.OracleViewDrop,
-	})
+	Register(
+		"oracle", Loader{
+			Mask:             ":%d",
+			Schema:           models.OracleSchema,
+			Procs:            models.OracleProcs,
+			ProcParams:       models.OracleProcParams,
+			Tables:           models.OracleTables,
+			TableColumns:     models.OracleTableColumns,
+			TableSequences:   models.OracleTableSequences,
+			TableForeignKeys: models.OracleTableForeignKeys,
+			TableIndexes:     models.OracleTableIndexes,
+			IndexColumns:     models.OracleIndexColumns,
+			ViewCreate:       models.OracleViewCreate,
+			ViewTruncate:     models.OracleViewTruncate,
+			ViewDrop:         models.OracleViewDrop,
+		},
+	)
 }
 
 // OracleGoType parse a oracle type into a Go type based on the column

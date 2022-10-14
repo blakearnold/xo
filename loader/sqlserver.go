@@ -3,26 +3,28 @@ package loader
 import (
 	"regexp"
 
-	"github.com/xo/xo/models"
-	xo "github.com/xo/xo/types"
+	"github.com/blakearnold/xo/models"
+	xo "github.com/blakearnold/xo/types"
 )
 
 func init() {
-	Register("sqlserver", Loader{
-		Mask:             "@p%d",
-		Schema:           models.SqlserverSchema,
-		Procs:            models.SqlserverProcs,
-		ProcParams:       models.SqlserverProcParams,
-		Tables:           models.SqlserverTables,
-		TableColumns:     models.SqlserverTableColumns,
-		TableSequences:   models.SqlserverTableSequences,
-		TableForeignKeys: models.SqlserverTableForeignKeys,
-		TableIndexes:     models.SqlserverTableIndexes,
-		IndexColumns:     models.SqlserverIndexColumns,
-		ViewCreate:       models.SqlserverViewCreate,
-		ViewDrop:         models.SqlserverViewDrop,
-		ViewStrip:        SqlserverViewStrip,
-	})
+	Register(
+		"sqlserver", Loader{
+			Mask:             "@p%d",
+			Schema:           models.SqlserverSchema,
+			Procs:            models.SqlserverProcs,
+			ProcParams:       models.SqlserverProcParams,
+			Tables:           models.SqlserverTables,
+			TableColumns:     models.SqlserverTableColumns,
+			TableSequences:   models.SqlserverTableSequences,
+			TableForeignKeys: models.SqlserverTableForeignKeys,
+			TableIndexes:     models.SqlserverTableIndexes,
+			IndexColumns:     models.SqlserverIndexColumns,
+			ViewCreate:       models.SqlserverViewCreate,
+			ViewDrop:         models.SqlserverViewDrop,
+			ViewStrip:        SqlserverViewStrip,
+		},
+	)
 }
 
 // SqlserverGoType parse a mssql type into a Go type based on the column

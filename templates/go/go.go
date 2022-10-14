@@ -19,8 +19,8 @@ import (
 
 	"github.com/kenshaw/inflector"
 	"github.com/kenshaw/snaker"
-	"github.com/xo/xo/loader"
-	xo "github.com/xo/xo/types"
+	"github.com/blakearnold/xo/loader"
+	xo "github.com/blakearnold/xo/types"
 	"golang.org/x/tools/imports"
 	"mvdan.cc/gofumpt/format"
 )
@@ -95,236 +95,246 @@ func Init(ctx context.Context, f func(xo.TemplateType)) error {
 		"pq.StringArray":  "a",
 		"pq.GenericArray": "a",
 	}
-	f(xo.TemplateType{
-		Modes: []string{"query", "schema"},
-		Flags: []xo.Flag{
-			{
-				ContextKey: AppendKey,
-				Type:       "bool",
-				Desc:       "enable append mode",
-				Short:      "a",
-				Aliases:    []string{"append"},
+	f(
+		xo.TemplateType{
+			Modes: []string{"query", "schema"},
+			Flags: []xo.Flag{
+				{
+					ContextKey: AppendKey,
+					Type:       "bool",
+					Desc:       "enable append mode",
+					Short:      "a",
+					Aliases:    []string{"append"},
+				},
+				{
+					ContextKey: NotFirstKey,
+					Type:       "bool",
+					Desc:       "disable package file (ie. not first generated file)",
+					Short:      "2",
+					Default:    "false",
+				},
+				{
+					ContextKey: Int32Key,
+					Type:       "string",
+					Desc:       "int32 type",
+					Default:    "int",
+				},
+				{
+					ContextKey: Uint32Key,
+					Type:       "string",
+					Desc:       "uint32 type",
+					Default:    "uint",
+				},
+				{
+					ContextKey: ArrayModeKey,
+					Type:       "string",
+					Desc:       "array type mode (postgres only)",
+					Enums:      []string{"stdlib", "pq"},
+				},
+				{
+					ContextKey: PkgKey,
+					Type:       "string",
+					Desc:       "package name",
+				},
+				{
+					ContextKey: TagKey,
+					Type:       "[]string",
+					Desc:       "build tags",
+				},
+				{
+					ContextKey: ImportKey,
+					Type:       "[]string",
+					Desc:       "package imports",
+				},
+				{
+					ContextKey: UUIDKey,
+					Type:       "string",
+					Desc:       "uuid type package",
+					Default:    "github.com/google/uuid",
+				},
+				{
+					ContextKey: CustomKey,
+					Type:       "string",
+					Desc:       "package name for custom types",
+				},
+				{
+					ContextKey: ConflictKey,
+					Type:       "string",
+					Desc:       "name conflict suffix",
+					Default:    "Val",
+				},
+				{
+					ContextKey: InitialismKey,
+					Type:       "[]string",
+					Desc:       "add initialism (e.g. ID, API, URI, ...)",
+				},
+				{
+					ContextKey: EscKey,
+					Type:       "[]string",
+					Desc:       "escape fields",
+					Default:    "none",
+					Enums:      []string{"none", "schema", "table", "column", "all"},
+				},
+				{
+					ContextKey: FieldTagKey,
+					Type:       "string",
+					Desc:       "field tag",
+					Short:      "g",
+					Default:    `json:"{{ .SQLName }}"`,
+				},
+				{
+					ContextKey: ContextKey,
+					Type:       "string",
+					Desc:       "context mode",
+					Default:    "only",
+					Enums:      []string{"disable", "both", "only"},
+				},
+				{
+					ContextKey: InjectKey,
+					Type:       "string",
+					Desc:       "insert code into generated file headers",
+					Default:    "",
+				},
+				{
+					ContextKey: InjectFileKey,
+					Type:       "string",
+					Desc:       "insert code into generated file headers from a file",
+					Default:    "",
+				},
+				{
+					ContextKey: LegacyKey,
+					Type:       "bool",
+					Desc:       "enables legacy v1 template funcs",
+					Default:    "false",
+				},
+				{
+					ContextKey: OracleTypeKey,
+					Type:       "string",
+					Desc:       "oracle driver type",
+					Default:    "ora",
+					Enums:      []string{"ora", "godror"},
+				},
 			},
-			{
-				ContextKey: NotFirstKey,
-				Type:       "bool",
-				Desc:       "disable package file (ie. not first generated file)",
-				Short:      "2",
-				Default:    "false",
-			},
-			{
-				ContextKey: Int32Key,
-				Type:       "string",
-				Desc:       "int32 type",
-				Default:    "int",
-			},
-			{
-				ContextKey: Uint32Key,
-				Type:       "string",
-				Desc:       "uint32 type",
-				Default:    "uint",
-			},
-			{
-				ContextKey: ArrayModeKey,
-				Type:       "string",
-				Desc:       "array type mode (postgres only)",
-				Enums:      []string{"stdlib", "pq"},
-			},
-			{
-				ContextKey: PkgKey,
-				Type:       "string",
-				Desc:       "package name",
-			},
-			{
-				ContextKey: TagKey,
-				Type:       "[]string",
-				Desc:       "build tags",
-			},
-			{
-				ContextKey: ImportKey,
-				Type:       "[]string",
-				Desc:       "package imports",
-			},
-			{
-				ContextKey: UUIDKey,
-				Type:       "string",
-				Desc:       "uuid type package",
-				Default:    "github.com/google/uuid",
-			},
-			{
-				ContextKey: CustomKey,
-				Type:       "string",
-				Desc:       "package name for custom types",
-			},
-			{
-				ContextKey: ConflictKey,
-				Type:       "string",
-				Desc:       "name conflict suffix",
-				Default:    "Val",
-			},
-			{
-				ContextKey: InitialismKey,
-				Type:       "[]string",
-				Desc:       "add initialism (e.g. ID, API, URI, ...)",
-			},
-			{
-				ContextKey: EscKey,
-				Type:       "[]string",
-				Desc:       "escape fields",
-				Default:    "none",
-				Enums:      []string{"none", "schema", "table", "column", "all"},
-			},
-			{
-				ContextKey: FieldTagKey,
-				Type:       "string",
-				Desc:       "field tag",
-				Short:      "g",
-				Default:    `json:"{{ .SQLName }}"`,
-			},
-			{
-				ContextKey: ContextKey,
-				Type:       "string",
-				Desc:       "context mode",
-				Default:    "only",
-				Enums:      []string{"disable", "both", "only"},
-			},
-			{
-				ContextKey: InjectKey,
-				Type:       "string",
-				Desc:       "insert code into generated file headers",
-				Default:    "",
-			},
-			{
-				ContextKey: InjectFileKey,
-				Type:       "string",
-				Desc:       "insert code into generated file headers from a file",
-				Default:    "",
-			},
-			{
-				ContextKey: LegacyKey,
-				Type:       "bool",
-				Desc:       "enables legacy v1 template funcs",
-				Default:    "false",
-			},
-			{
-				ContextKey: OracleTypeKey,
-				Type:       "string",
-				Desc:       "oracle driver type",
-				Default:    "ora",
-				Enums:      []string{"ora", "godror"},
-			},
-		},
-		Funcs: func(ctx context.Context, _ string) (template.FuncMap, error) {
-			funcs, err := NewFuncs(ctx)
-			if err != nil {
-				return nil, err
-			}
-			if Legacy(ctx) {
-				addLegacyFuncs(ctx, funcs)
-			}
-			return funcs, nil
-		},
-		NewContext: func(ctx context.Context, _ string) context.Context {
-			ctx = context.WithValue(ctx, KnownTypesKey, knownTypes)
-			ctx = context.WithValue(ctx, ShortsKey, shorts)
-			return ctx
-		},
-		Order: func(ctx context.Context, mode string) []string {
-			base := []string{"header", "db"}
-			switch mode {
-			case "query":
-				return append(base, "typedef", "query")
-			case "schema":
-				return append(base, "enum", "proc", "typedef", "query", "index", "foreignkey")
-			}
-			return nil
-		},
-		Pre: func(ctx context.Context, mode string, set *xo.Set, out fs.FS, emit func(xo.Template)) error {
-			if err := addInitialisms(ctx); err != nil {
-				return err
-			}
-			files, err := fileNames(ctx, mode, set)
-			if err != nil {
-				return err
-			}
-			// If -2 is provided, skip package template outputs as requested.
-			// If -a is provided, skip to avoid duplicating the template.
-			if !NotFirst(ctx) && !Append(ctx) {
-				emit(xo.Template{
-					Partial: "db",
-					Dest:    "db.xo.go",
-				})
-				// If --single is provided, don't generate header for db.xo.go.
-				if xo.Single(ctx) == "" {
-					files["db.xo.go"] = true
-				}
-			}
-			if Append(ctx) {
-				for filename := range files {
-					f, err := out.Open(filename)
-					switch {
-					case errors.Is(err, os.ErrNotExist):
-						continue
-					case err != nil:
-						return err
-					}
-					defer f.Close()
-					data, err := io.ReadAll(f)
-					if err != nil {
-						return err
-					}
-					emit(xo.Template{
-						Src:     "{{.Data}}",
-						Partial: "header", // ordered first
-						Data:    string(data),
-						Dest:    filename,
-					})
-					delete(files, filename)
-				}
-			}
-			for filename := range files {
-				emit(xo.Template{
-					Partial: "header",
-					Dest:    filename,
-				})
-			}
-			return nil
-		},
-		Process: func(ctx context.Context, mode string, set *xo.Set, emit func(xo.Template)) error {
-			if mode == "query" {
-				for _, query := range set.Queries {
-					if err := emitQuery(ctx, query, emit); err != nil {
-						return err
-					}
-				}
-			} else {
-				for _, schema := range set.Schemas {
-					if err := emitSchema(ctx, schema, emit); err != nil {
-						return err
-					}
-				}
-			}
-			return nil
-		},
-		Post: func(ctx context.Context, mode string, files map[string][]byte, emit func(string, []byte)) error {
-			for file, content := range files {
-				// Run goimports.
-				buf, err := imports.Process("", content, nil)
+			Funcs: func(ctx context.Context, _ string) (template.FuncMap, error) {
+				funcs, err := NewFuncs(ctx)
 				if err != nil {
-					return fmt.Errorf("%s:%w", file, err)
+					return nil, err
 				}
-				// Run gofumpt.
-				formatted, err := format.Source(buf, format.Options{
-					ExtraRules: true,
-				})
+				if Legacy(ctx) {
+					addLegacyFuncs(ctx, funcs)
+				}
+				return funcs, nil
+			},
+			NewContext: func(ctx context.Context, _ string) context.Context {
+				ctx = context.WithValue(ctx, KnownTypesKey, knownTypes)
+				ctx = context.WithValue(ctx, ShortsKey, shorts)
+				return ctx
+			},
+			Order: func(ctx context.Context, mode string) []string {
+				base := []string{"header", "db"}
+				switch mode {
+				case "query":
+					return append(base, "typedef", "query")
+				case "schema":
+					return append(base, "enum", "proc", "typedef", "query", "index", "foreignkey")
+				}
+				return nil
+			},
+			Pre: func(ctx context.Context, mode string, set *xo.Set, out fs.FS, emit func(xo.Template)) error {
+				if err := addInitialisms(ctx); err != nil {
+					return err
+				}
+				files, err := fileNames(ctx, mode, set)
 				if err != nil {
 					return err
 				}
-				emit(file, formatted)
-			}
-			return nil
+				// If -2 is provided, skip package template outputs as requested.
+				// If -a is provided, skip to avoid duplicating the template.
+				if !NotFirst(ctx) && !Append(ctx) {
+					emit(
+						xo.Template{
+							Partial: "db",
+							Dest:    "db.xo.go",
+						},
+					)
+					// If --single is provided, don't generate header for db.xo.go.
+					if xo.Single(ctx) == "" {
+						files["db.xo.go"] = true
+					}
+				}
+				if Append(ctx) {
+					for filename := range files {
+						f, err := out.Open(filename)
+						switch {
+						case errors.Is(err, os.ErrNotExist):
+							continue
+						case err != nil:
+							return err
+						}
+						defer f.Close()
+						data, err := io.ReadAll(f)
+						if err != nil {
+							return err
+						}
+						emit(
+							xo.Template{
+								Src:     "{{.Data}}",
+								Partial: "header", // ordered first
+								Data:    string(data),
+								Dest:    filename,
+							},
+						)
+						delete(files, filename)
+					}
+				}
+				for filename := range files {
+					emit(
+						xo.Template{
+							Partial: "header",
+							Dest:    filename,
+						},
+					)
+				}
+				return nil
+			},
+			Process: func(ctx context.Context, mode string, set *xo.Set, emit func(xo.Template)) error {
+				if mode == "query" {
+					for _, query := range set.Queries {
+						if err := emitQuery(ctx, query, emit); err != nil {
+							return err
+						}
+					}
+				} else {
+					for _, schema := range set.Schemas {
+						if err := emitSchema(ctx, schema, emit); err != nil {
+							return err
+						}
+					}
+				}
+				return nil
+			},
+			Post: func(ctx context.Context, mode string, files map[string][]byte, emit func(string, []byte)) error {
+				for file, content := range files {
+					// Run goimports.
+					buf, err := imports.Process("", content, nil)
+					if err != nil {
+						return fmt.Errorf("%s:%w", file, err)
+					}
+					// Run gofumpt.
+					formatted, err := format.Source(
+						buf, format.Options{
+							ExtraRules: true,
+						},
+					)
+					if err != nil {
+						return err
+					}
+					emit(file, formatted)
+				}
+				return nil
+			},
 		},
-	})
+	)
 	return nil
 }
 
@@ -393,43 +403,49 @@ func emitQuery(ctx context.Context, query xo.Query, emit func(xo.Template)) erro
 	}
 	// emit type definition
 	if !query.Exec && !query.Flat && !Append(ctx) {
-		emit(xo.Template{
-			Partial:  "typedef",
-			Dest:     strings.ToLower(table.GoName) + ext,
-			SortType: query.Type,
-			SortName: query.Name,
-			Data:     table,
-		})
+		emit(
+			xo.Template{
+				Partial:  "typedef",
+				Dest:     strings.ToLower(table.GoName) + ext,
+				SortType: query.Type,
+				SortName: query.Name,
+				Data:     table,
+			},
+		)
 	}
 	// build query params
 	var params []QueryParam
 	for _, param := range query.Params {
-		params = append(params, QueryParam{
-			Name:        param.Name,
-			Type:        param.Type.Type,
-			Interpolate: param.Interpolate,
-			Join:        param.Join,
-		})
+		params = append(
+			params, QueryParam{
+				Name:        param.Name,
+				Type:        param.Type.Type,
+				Interpolate: param.Interpolate,
+				Join:        param.Join,
+			},
+		)
 	}
 	// emit query
-	emit(xo.Template{
-		Partial:  "query",
-		Dest:     strings.ToLower(table.GoName) + ext,
-		SortType: query.Type,
-		SortName: query.Name,
-		Data: Query{
-			Name:        buildQueryName(query),
-			Query:       query.Query,
-			Comments:    query.Comments,
-			Params:      params,
-			One:         query.Exec || query.Flat || query.One,
-			Flat:        query.Flat,
-			Exec:        query.Exec,
-			Interpolate: query.Interpolate,
-			Type:        table,
-			Comment:     query.Comment,
+	emit(
+		xo.Template{
+			Partial:  "query",
+			Dest:     strings.ToLower(table.GoName) + ext,
+			SortType: query.Type,
+			SortName: query.Name,
+			Data: Query{
+				Name:        buildQueryName(query),
+				Query:       query.Query,
+				Comments:    query.Comments,
+				Params:      params,
+				One:         query.Exec || query.Flat || query.One,
+				Flat:        query.Flat,
+				Exec:        query.Exec,
+				Interpolate: query.Interpolate,
+				Type:        table,
+				Comment:     query.Comment,
+			},
 		},
-	})
+	)
 	return nil
 }
 
@@ -490,12 +506,14 @@ func emitSchema(ctx context.Context, schema xo.Schema, emit func(xo.Template)) e
 	// emit enums
 	for _, e := range schema.Enums {
 		enum := convertEnum(e)
-		emit(xo.Template{
-			Partial:  "enum",
-			Dest:     strings.ToLower(enum.GoName) + ext,
-			SortName: enum.GoName,
-			Data:     enum,
-		})
+		emit(
+			xo.Template{
+				Partial:  "enum",
+				Dest:     strings.ToLower(enum.GoName) + ext,
+				SortName: enum.GoName,
+				Data:     enum,
+			},
+		)
 	}
 	// build procs
 	overloadMap := make(map[string][]Proc)
@@ -519,12 +537,14 @@ func emitSchema(ctx context.Context, schema xo.Schema, emit func(xo.Template)) e
 		for i := range procs {
 			procs[i].Overloaded = len(procs) > 1
 		}
-		emit(xo.Template{
-			Dest:     prefix + strings.ToLower(name) + ext,
-			Partial:  "procs",
-			SortName: prefix + name,
-			Data:     procs,
-		})
+		emit(
+			xo.Template{
+				Dest:     prefix + strings.ToLower(name) + ext,
+				Partial:  "procs",
+				SortName: prefix + name,
+				Data:     procs,
+			},
+		)
 	}
 	// emit tables
 	for _, t := range append(schema.Tables, schema.Views...) {
@@ -532,26 +552,30 @@ func emitSchema(ctx context.Context, schema xo.Schema, emit func(xo.Template)) e
 		if err != nil {
 			return err
 		}
-		emit(xo.Template{
-			Dest:     strings.ToLower(table.GoName) + ext,
-			Partial:  "typedef",
-			SortType: table.Type,
-			SortName: table.GoName,
-			Data:     table,
-		})
+		emit(
+			xo.Template{
+				Dest:     strings.ToLower(table.GoName) + ext,
+				Partial:  "typedef",
+				SortType: table.Type,
+				SortName: table.GoName,
+				Data:     table,
+			},
+		)
 		// emit indexes
 		for _, i := range t.Indexes {
 			index, err := convertIndex(ctx, table, i)
 			if err != nil {
 				return err
 			}
-			emit(xo.Template{
-				Dest:     strings.ToLower(table.GoName) + ext,
-				Partial:  "index",
-				SortType: table.Type,
-				SortName: index.SQLName,
-				Data:     index,
-			})
+			emit(
+				xo.Template{
+					Dest:     strings.ToLower(table.GoName) + ext,
+					Partial:  "index",
+					SortType: table.Type,
+					SortName: index.SQLName,
+					Data:     index,
+				},
+			)
 		}
 		// emit fkeys
 		for _, fk := range t.ForeignKeys {
@@ -559,13 +583,15 @@ func emitSchema(ctx context.Context, schema xo.Schema, emit func(xo.Template)) e
 			if err != nil {
 				return err
 			}
-			emit(xo.Template{
-				Dest:     strings.ToLower(table.GoName) + ext,
-				Partial:  "foreignkey",
-				SortType: table.Type,
-				SortName: fkey.SQLName,
-				Data:     fkey,
-			})
+			emit(
+				xo.Template{
+					Dest:     strings.ToLower(table.GoName) + ext,
+					Partial:  "foreignkey",
+					SortType: table.Type,
+					SortName: fkey.SQLName,
+					Data:     fkey,
+				},
+			)
 		}
 	}
 	return nil
@@ -580,11 +606,13 @@ func convertEnum(e xo.Enum) Enum {
 		if strings.HasSuffix(name, goName) && goName != name {
 			name = strings.TrimSuffix(name, goName)
 		}
-		vals = append(vals, EnumValue{
-			GoName:     name,
-			SQLName:    v.Name,
-			ConstValue: *v.ConstValue,
-		})
+		vals = append(
+			vals, EnumValue{
+				GoName:     name,
+				SQLName:    v.Name,
+				ConstValue: *v.ConstValue,
+			},
+		)
 	}
 	return Enum{
 		GoName:  goName,
@@ -974,10 +1002,12 @@ func (f *Funcs) importsfn() []PackageImport {
 		if i := strings.Index(pkg, " "); i != -1 {
 			alias, pkg = pkg[:i], strings.TrimSpace(pkg[i:])
 		}
-		imports = append(imports, PackageImport{
-			Alias: alias,
-			Pkg:   strconv.Quote(pkg),
-		})
+		imports = append(
+			imports, PackageImport{
+				Alias: alias,
+				Pkg:   strconv.Quote(pkg),
+			},
+		)
 	}
 	return imports
 }
@@ -1658,10 +1688,12 @@ func (f *Funcs) sqlstr_upsert_sqlserver_oracle(v interface{}) []string {
 		case "oracle":
 			closing = `FROM DUAL ) s `
 		}
-		lines = append(lines, `USING (`,
+		lines = append(
+			lines, `USING (`,
 			`SELECT `+strings.Join(fields, ", ")+" ",
 			closing,
-			`ON `+strings.Join(predicate, " AND ")+" ")
+			`ON `+strings.Join(predicate, " AND ")+" ",
+		)
 		// build param lists
 		var updateParams, insertParams, insertVals []string
 		for _, field := range x.Fields {
@@ -1677,7 +1709,8 @@ func (f *Funcs) sqlstr_upsert_sqlserver_oracle(v interface{}) []string {
 			insertVals = append(insertVals, "s."+field.SQLName)
 		}
 		// when matched then update...
-		lines = append(lines,
+		lines = append(
+			lines,
 			`WHEN MATCHED THEN `, `UPDATE SET `,
 			strings.Join(updateParams, ", ")+" ",
 			`WHEN NOT MATCHED THEN `,

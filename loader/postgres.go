@@ -7,30 +7,32 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xo/xo/models"
-	xo "github.com/xo/xo/types"
+	"github.com/blakearnold/xo/models"
+	xo "github.com/blakearnold/xo/types"
 )
 
 func init() {
-	Register("postgres", Loader{
-		Mask:             "$%d",
-		Flags:            PostgresFlags,
-		Schema:           models.PostgresSchema,
-		Enums:            models.PostgresEnums,
-		EnumValues:       models.PostgresEnumValues,
-		Procs:            models.PostgresProcs,
-		ProcParams:       models.PostgresProcParams,
-		Tables:           models.PostgresTables,
-		TableColumns:     PostgresTableColumns,
-		TableSequences:   models.PostgresTableSequences,
-		TableForeignKeys: models.PostgresTableForeignKeys,
-		TableIndexes:     models.PostgresTableIndexes,
-		IndexColumns:     PostgresIndexColumns,
-		ViewCreate:       models.PostgresViewCreate,
-		ViewSchema:       models.PostgresViewSchema,
-		ViewDrop:         models.PostgresViewDrop,
-		ViewStrip:        PostgresViewStrip,
-	})
+	Register(
+		"postgres", Loader{
+			Mask:             "$%d",
+			Flags:            PostgresFlags,
+			Schema:           models.PostgresSchema,
+			Enums:            models.PostgresEnums,
+			EnumValues:       models.PostgresEnumValues,
+			Procs:            models.PostgresProcs,
+			ProcParams:       models.PostgresProcParams,
+			Tables:           models.PostgresTables,
+			TableColumns:     PostgresTableColumns,
+			TableSequences:   models.PostgresTableSequences,
+			TableForeignKeys: models.PostgresTableForeignKeys,
+			TableIndexes:     models.PostgresTableIndexes,
+			IndexColumns:     PostgresIndexColumns,
+			ViewCreate:       models.PostgresViewCreate,
+			ViewSchema:       models.PostgresViewSchema,
+			ViewDrop:         models.PostgresViewDrop,
+			ViewStrip:        PostgresViewStrip,
+		},
+	)
 }
 
 // PostgresFlags returnss the postgres flags.
@@ -182,7 +184,13 @@ func PostgresTableColumns(ctx context.Context, db models.DB, schema string, tabl
 // PostgresIndexColumns returns the column list for an index.
 //
 // FIXME: rewrite this using SQL exclusively using OVER
-func PostgresIndexColumns(ctx context.Context, db models.DB, schema string, table string, index string) ([]*models.IndexColumn, error) {
+func PostgresIndexColumns(
+	ctx context.Context,
+	db models.DB,
+	schema string,
+	table string,
+	index string,
+) ([]*models.IndexColumn, error) {
 	// load columns
 	cols, err := models.PostgresIndexColumns(ctx, db, schema, index)
 	if err != nil {

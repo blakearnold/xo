@@ -16,8 +16,8 @@ import (
 
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
-	"github.com/xo/xo/internal"
-	xo "github.com/xo/xo/types"
+	"github.com/blakearnold/xo/internal"
+	xo "github.com/blakearnold/xo/types"
 )
 
 // Set holds a set of templates and handles generating files for a target
@@ -96,15 +96,17 @@ func (ts *Set) LoadDefault(ctx context.Context, name string) error {
 func (ts *Set) AddTemplates(ctx context.Context, src fs.FS, unrestricted bool) error {
 	// get target dir names
 	var targets []string
-	if err := fs.WalkDir(src, ".", func(n string, d fs.DirEntry, err error) error {
-		switch {
-		case err != nil:
-			return err
-		case d.IsDir() && n != ".":
-			targets = append(targets, n)
-		}
-		return nil
-	}); err != nil {
+	if err := fs.WalkDir(
+		src, ".", func(n string, d fs.DirEntry, err error) error {
+			switch {
+			case err != nil:
+				return err
+			case d.IsDir() && n != ".":
+				targets = append(targets, n)
+			}
+			return nil
+		},
+	); err != nil {
 		return err
 	}
 	sort.Strings(targets)
@@ -284,21 +286,25 @@ func (ts *Set) Process(ctx context.Context, outDir string, mode string, set *xo.
 	for k := range ts.files {
 		filenames = append(filenames, k)
 	}
-	sort.Slice(filenames, func(i, j int) bool {
-		return filenames[i] < filenames[j]
-	})
+	sort.Slice(
+		filenames, func(i, j int) bool {
+			return filenames[i] < filenames[j]
+		},
+	)
 	// Generate all files with the constructed template.
 	for _, file := range filenames {
 		emitted := ts.files[file]
-		sort.Slice(emitted.Template, func(i int, j int) bool {
-			if emitted.Template[i].Partial != emitted.Template[j].Partial {
-				return order[emitted.Template[i].Partial] < order[emitted.Template[j].Partial]
-			}
-			if emitted.Template[i].SortType != emitted.Template[j].SortType {
-				return emitted.Template[i].SortType < emitted.Template[j].SortType
-			}
-			return emitted.Template[i].SortName < emitted.Template[j].SortName
-		})
+		sort.Slice(
+			emitted.Template, func(i int, j int) bool {
+				if emitted.Template[i].Partial != emitted.Template[j].Partial {
+					return order[emitted.Template[i].Partial] < order[emitted.Template[j].Partial]
+				}
+				if emitted.Template[i].SortType != emitted.Template[j].SortType {
+					return emitted.Template[i].SortType < emitted.Template[j].SortType
+				}
+				return emitted.Template[i].SortName < emitted.Template[j].SortName
+			},
+		)
 		for _, tpl := range emitted.Template {
 			if tpl.Src == "" {
 				err := ts.goTpl.ExecuteTemplate(&emitted.Buf, tpl.Partial, tpl)
@@ -335,11 +341,13 @@ func (ts *Set) Post(ctx context.Context, mode string) {
 	for fileName, emitted := range ts.files {
 		files[fileName] = emitted.Buf.Bytes()
 	}
-	err := target.Type.Post(ctx, mode, files, func(fileName string, content []byte) {
-		// Reset the buffer and fill it with the provided content.
-		ts.files[fileName].Buf.Reset()
-		ts.files[fileName].Buf.Write(content)
-	})
+	err := target.Type.Post(
+		ctx, mode, files, func(fileName string, content []byte) {
+			// Reset the buffer and fill it with the provided content.
+			ts.files[fileName].Buf.Reset()
+			ts.files[fileName].Buf.Write(content)
+		},
+	)
 	if err != nil {
 		ts.err = err
 		return
@@ -393,12 +401,14 @@ type Target struct {
 // Uses the template set's symbols, init func name, and declared tags.
 func (ts *Set) NewTemplate(ctx context.Context, target string, src fs.FS, unrestricted bool) (*Target, error) {
 	// build interpreter for custom funcs
-	i := interp.New(interp.Options{
-		GoPath:               ".",
-		BuildTags:            ts.tags,
-		SourcecodeFilesystem: sourceFS{path: "src/main/vendor/" + target, fs: src},
-		Unrestricted:         unrestricted,
-	})
+	i := interp.New(
+		interp.Options{
+			GoPath:               ".",
+			BuildTags:            ts.tags,
+			SourcecodeFilesystem: sourceFS{path: "src/main/vendor/" + target, fs: src},
+			Unrestricted:         unrestricted,
+		},
+	)
 	// add symbols
 	if ts.symbols != nil {
 		if err := i.Use(ts.symbols); err != nil {
@@ -417,13 +427,20 @@ func (ts *Set) NewTemplate(ctx context.Context, target string, src fs.FS, unrest
 	// convert init
 	tplInit, ok := v.Interface().(func(context.Context, func(xo.TemplateType)) error)
 	if !ok {
-		return nil, fmt.Errorf("%s: %s has signature `%T` (must be `func(context.Context, func(github.com/xo/types.TemplateType)) error`)", target, ts.initfunc, v.Interface())
+		return nil, fmt.Errorf(
+			"%s: %s has signature `%T` (must be `func(context.Context, func(github.com/xo/types.TemplateType)) error`)",
+			target,
+			ts.initfunc,
+			v.Interface(),
+		)
 	}
 	// init
 	var typ xo.TemplateType
-	err = tplInit(ctx, func(tplType xo.TemplateType) {
-		typ = tplType
-	})
+	err = tplInit(
+		ctx, func(tplType xo.TemplateType) {
+			typ = tplType
+		},
+	)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s error: %w", target, ts.initfunc, err)
 	}
@@ -442,11 +459,13 @@ func (ts *Set) NewTemplate(ctx context.Context, target string, src fs.FS, unrest
 func (target *Target) Flags() []xo.FlagSet {
 	var flags []xo.FlagSet
 	for _, flag := range target.Type.Flags {
-		flags = append(flags, xo.FlagSet{
-			Type: target.Name,
-			Name: string(flag.ContextKey),
-			Flag: flag,
-		})
+		flags = append(
+			flags, xo.FlagSet{
+				Type: target.Name,
+				Name: string(flag.ContextKey),
+				Flag: flag,
+			},
+		)
 	}
 	return flags
 }

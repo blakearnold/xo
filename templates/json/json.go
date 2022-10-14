@@ -9,52 +9,56 @@ import (
 	"strings"
 	"text/template"
 
-	xo "github.com/xo/xo/types"
+	xo "github.com/blakearnold/xo/types"
 )
 
 // Init registers the template.
 func Init(ctx context.Context, f func(xo.TemplateType)) error {
-	f(xo.TemplateType{
-		Modes: []string{"query", "schema"},
-		Flags: []xo.Flag{
-			{
-				ContextKey: IndentKey,
-				Type:       "string",
-				Desc:       "indent spacing",
-				Default:    "  ",
-			},
-			{
-				ContextKey: UglyKey,
-				Type:       "bool",
-				Desc:       "disable indentation",
-				Default:    "false",
-			},
-		},
-		Funcs: func(ctx context.Context, _ string) (template.FuncMap, error) {
-			return template.FuncMap{
-				// json marshals v as json.
-				"json": func(v interface{}) (string, error) {
-					buf := new(bytes.Buffer)
-					enc := json.NewEncoder(buf)
-					if !Ugly(ctx) {
-						enc.SetIndent("", Indent(ctx))
-					}
-					if err := enc.Encode(v); err != nil {
-						return "", err
-					}
-					return strings.TrimSpace(buf.String()), nil
+	f(
+		xo.TemplateType{
+			Modes: []string{"query", "schema"},
+			Flags: []xo.Flag{
+				{
+					ContextKey: IndentKey,
+					Type:       "string",
+					Desc:       "indent spacing",
+					Default:    "  ",
 				},
-			}, nil
+				{
+					ContextKey: UglyKey,
+					Type:       "bool",
+					Desc:       "disable indentation",
+					Default:    "false",
+				},
+			},
+			Funcs: func(ctx context.Context, _ string) (template.FuncMap, error) {
+				return template.FuncMap{
+					// json marshals v as json.
+					"json": func(v interface{}) (string, error) {
+						buf := new(bytes.Buffer)
+						enc := json.NewEncoder(buf)
+						if !Ugly(ctx) {
+							enc.SetIndent("", Indent(ctx))
+						}
+						if err := enc.Encode(v); err != nil {
+							return "", err
+						}
+						return strings.TrimSpace(buf.String()), nil
+					},
+				}, nil
+			},
+			Process: func(ctx context.Context, _ string, set *xo.Set, emit func(xo.Template)) error {
+				emit(
+					xo.Template{
+						Partial: "json",
+						Dest:    "xo.xo.json",
+						Data:    set,
+					},
+				)
+				return nil
+			},
 		},
-		Process: func(ctx context.Context, _ string, set *xo.Set, emit func(xo.Template)) error {
-			emit(xo.Template{
-				Partial: "json",
-				Dest:    "xo.xo.json",
-				Data:    set,
-			})
-			return nil
-		},
-	})
+	)
 	return nil
 }
 
